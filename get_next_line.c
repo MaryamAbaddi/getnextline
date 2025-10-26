@@ -5,8 +5,8 @@ char *ft_strjoin_free(char *rem, char *chunk)
 {
     int len = ft_strlen(rem) + ft_strlen(chunk);
     char *str = malloc(len + 1);
-    ft_strlcpy(str, rem);
-    ft_strlcat(str, chunk);
+    ft_strlcpy(str, rem,ft_strlen(rem));
+    ft_strlcat(str, chunk,ft_strlen(chunck);
     str[len] = '\0';
     free(rem);
     return (str);
