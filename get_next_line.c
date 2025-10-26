@@ -1,3 +1,6 @@
+
+#include "get_next_line.h"
+
 char *ft_strjoin_free(char *rem, char *chunk)
 {
     int len = ft_strlen(rem) + ft_strlen(chunk);
@@ -18,33 +21,49 @@ char *ft_read_chunk(int fd)
     buffer[bytestoread] = '\0';
     return ft_strdup(buffer);
 }
-
-char *get_next_line(int fd)
+static char	*extract_line(char **rem)
 {
-    static char *rem;
+	char	*found;
+	char	*line;
+	char	*new_rem;
+	int		len;
 
-    if (rem == NULL)
-        rem = ft_read_chunk(fd);
-    else
-        rem = ft_strjoin_free(rem, ft_read_chunk(fd));
-    if (!rem)
-        return NULL;
-    char *found = ft_strchr(rem, '\n');
-    if (found)
-    {
-        int len = found - rem + 1;
-        char *line = malloc(len + 1);
-        if (!line)
-            return NULL;
-        ft_strncpy(line, rem, len);
-        line[len] = '\0';
-        char *new_rem = ft_strdup(found + 1);
-        free(rem);
-        rem = new_rem;
-        return line;
-    }
-    char *line = ft_strdup(rem);
-    free(rem);
-    rem = NULL;
-    return line;
+	found = ft_strchr(*rem, '\n');
+	if (!found)
+		return (NULL);
+	len = found - *rem + 1;
+	line = malloc(len + 1);
+	if (!line)
+		return (NULL);
+	ft_strncpy(line, *rem, len);
+	line[len] = '\0';
+	new_rem = ft_strdup(found + 1);
+	free(*rem);
+	*rem = new_rem;
+	return (line);
 }
+
+char	*get_next_line(int fd)
+{
+	static char	*rem;
+	char		*chunk;
+	char		*line;
+
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	chunk = ft_read_chunk(fd);
+	if (!chunk && !rem)
+		return (NULL);
+	if (chunk)
+		rem = rem ? ft_strjoin_free(rem, chunk) : chunk;
+	line = extract_line(&rem);
+	if (line)
+		return (line);
+	if (!rem)
+		return (NULL);
+	line = ft_strdup(rem);
+	free(rem);
+	rem = NULL;
+	return (line);
+}
+
